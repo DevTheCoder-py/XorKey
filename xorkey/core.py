@@ -1,0 +1,26 @@
+import hashlib
+import hmac
+import string
+from xorkey.utils import *
+ASCII_CHARS = string.ascii_letters + string.digits + string.punctuation
+def generate_keystream(password: str, length:int, salt: bytes = b"") -> str:
+
+    key = hashlib.pbkdf2_hmac(
+           "sha256",
+           password.encode(),
+           salt,
+           200_000
+
+    ) 
+    keystream = b""
+    counter = 0
+    while len(keystream) < length:
+        counter_bytes = counter.to_bytes(4, "big")
+        block = hmac.new(key, counter_bytes, hashlib.sha256).digest()
+        keystream += block
+        counter += 1
+    
+    ascii_stream = "".join(ASCII_CHARS[b%len(ASCII_CHARS)] for b in keystream)
+    return ascii_stream
+
+

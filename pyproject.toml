@@ -1,0 +1,16 @@
+
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xorkey"
+version = "0.1"
+authors = [{name="DevTheCoder-py"}]
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[project.scripts]
+xorkey = "xorkey.main:main"
