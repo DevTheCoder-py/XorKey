@@ -20,6 +20,12 @@ def stringToBinStr(string):
 
 def generate_salt(length: int = 16) -> bytes:
     return secrets.token_bytes(length)
+def binary_to_ascii(bin_str):
+    ascii_out = ""
+    for i in range(0, len(bin_str), 8):
+        byte = bin_str[i:i+8]
+        ascii_out += chr(int(byte, 2))
+    return repr(ascii_out)
 
 #print(Xor2BinStrings("01011111111", "011010101010"))
 

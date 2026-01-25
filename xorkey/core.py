@@ -22,5 +22,17 @@ def generate_keystream(password: str, length:int, salt: bytes = b"") -> str:
     
     ascii_stream = "".join(ASCII_CHARS[b%len(ASCII_CHARS)] for b in keystream)
     return ascii_stream
+def encryptAutoGenandPass(string):
+    msgBin = stringToBinStr(string)
+    password = random_string(len(string))
+    passwordBin = stringToBinStr(password)
+    encryptedMsg = Xor2BinStrings(passwordBin, msgBin)
+    encryptedMsgASCII = binary_to_ascii(encryptedMsg)
+    return encryptedMsgASCII, password
+def decryptAutoGenandPass(string, password):
+    encryptedBin = stringToBinStr(string)
+    passwordBin = stringToBinStr(password)
+    originalMsg = binary_to_ascii(Xor2BinStrings(encryptedBin, passwordBin))
+    return originalMsg
 
 
