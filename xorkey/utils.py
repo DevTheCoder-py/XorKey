@@ -10,6 +10,7 @@ def Xor2BinStrings(message, key):
 
 def random_string(length):
     chars = string.ascii_letters + string.digits + string.punctuation #add all possible assci 8 bit characters
+    chars = chars.replace('"', '').replace("'", '')
     return ''.join(secrets.choice(chars) for _ in range(length)) #generate random
 
 def stringToBinStr(string):
