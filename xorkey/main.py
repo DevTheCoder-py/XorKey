@@ -27,14 +27,18 @@ def main():
             )
     args = parser.parse_args()
     if args.encrypt:
-        UsrInputStr2Encrypt = decode_escape_sequences(args.encrypt) 
+        UsrInputStr2Encrypt = args.encrypt 
         encryptedMsgandPass = encryptAutoGenandPass(UsrInputStr2Encrypt)
-        encryptedMsg = str(encryptedMsgandPass[0])
-        Pass = str(encryptedMsgandPass[1])
-        print("encrypted:",encryptedMsg)
+        encryptedMsg = str(encryptedMsgandPass[0])  # KEEP THIS LINE
+        Pass = str(encryptedMsgandPass[1])          # KEEP THIS LINE
+        
+        # Encode to base64
+        encryptedMsgBase64 = base64.b64encode(encryptedMsg.encode('latin-1')).decode('utf-8')
+        
+        print("encrypted:", encryptedMsgBase64)
         print("Password:", repr(Pass))
     if args.decrypt:
-        UsrInputStr2Decrypt = decode_escape_sequences(args.decrypt)
+        UsrInputStr2Decrypt = base64.b64decode(args.decrypt).decode('latin-1')
         UsrInputPswd = input("Password?\n")
         print(decryptAutoGenandPass(UsrInputStr2Decrypt, UsrInputPswd)) 
     elif len(sys.argv) == 1:

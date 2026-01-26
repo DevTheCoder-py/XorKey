@@ -1,6 +1,7 @@
 import secrets
 import string
 import codecs
+import base64
 def Xor2BinStrings(message, key):
     # although it implies it must me a msg and key, it will work with any as long as the bins are the same len 
     result = ""
@@ -27,7 +28,7 @@ def binary_to_ascii(bin_str):
     for i in range(0, len(bin_str), 8):
         byte = bin_str[i:i+8]
         ascii_out += chr(int(byte, 2))
-    return repr(ascii_out)
+    return ascii_out
 def decode_escape_sequences(s):
     """Decode escape sequences in string, handling mixed content"""
     try:
@@ -41,5 +42,13 @@ def decode_escape_sequences(s):
         except:
             # If all else fails, return original
             return s#print(random_string(5000))
+
+def encode_base64(text: str) -> str:
+    """Encode string to base64"""
+    return base64.b64encode(text.encode('utf-8')).decode('utf-8')
+
+def decode_base64(encoded: str) -> str:
+    """Decode base64 to string"""
+    return base64.b64decode(encoded.encode('utf-8')).decode('utf-8')
 
 

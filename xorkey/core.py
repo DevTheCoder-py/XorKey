@@ -38,5 +38,7 @@ def decryptAutoGenandPass(string, password):
     passwordBin = stringToBinStr(password)
     originalMsg = binary_to_ascii(Xor2BinStrings(encryptedBin, passwordBin))
     return originalMsg
+def encryptCustomPass(string, password)-> str:
+    pass
 
 
