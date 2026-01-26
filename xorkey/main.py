@@ -1,7 +1,11 @@
 from xorkey.core import *
 from xorkey.utils import *
+import argcomplete
 import argparse
 import sys
+from time import sleep
+RED = "\033[31m"
+RESET = "\033[0m"
 def main():
     parser = argparse.ArgumentParser(description="A encryption software utilising XOR, pretty much unbreakable",
                                      formatter_class=argparse.RawTextHelpFormatter)
@@ -17,31 +21,53 @@ def main():
             )
     parser.add_argument(
             "-f", "--format",
-            choices=['autogen', 'bin', 'personal',"autodetect"],
-            default="autodetect",
-            help=("   autogen: portable;\n"
-            "  personal: this app only;\n"
-            "       bin: personal but in binary;\n"
-            "autodetect: if you're confused then probably use this unless there is an error"
+            choices=['pure', 'normal', 'personal',"auto"],
+            default="auto",
+            help=("pure: raw encrypted output, no encoding;\n"
+                  "normal: standard base64 encoded output (default);\n"
+                  "personal: app-specific format;\n"
+                  "auto: same as normal;"
                   )
             )
+    argcomplete.autocomplete(parser)
     args = parser.parse_args()
+    print(f"DEBUG: args.format is {args.format}")
     if args.encrypt:
-        UsrInputStr2Encrypt = args.encrypt 
-        encryptedMsgandPass = encryptAutoGenandPass(UsrInputStr2Encrypt)
-        encryptedMsg = str(encryptedMsgandPass[0])  # KEEP THIS LINE
-        Pass = str(encryptedMsgandPass[1])          # KEEP THIS LINE
-        
-        # Encode to base64
-        encryptedMsgBase64 = base64.b64encode(encryptedMsg.encode('latin-1')).decode('utf-8')
-        
-        print("encrypted:", encryptedMsgBase64)
-        print("Password:", repr(Pass))
-    if args.decrypt:
-        UsrInputStr2Decrypt = base64.b64decode(args.decrypt).decode('latin-1')
-        UsrInputPswd = input("Password?\n")
-        print(decryptAutoGenandPass(UsrInputStr2Decrypt, UsrInputPswd)) 
-    elif len(sys.argv) == 1:
-        print("No arguement eprovided; Use -h to see manual")
+        encryptedMsg = "Encryption Failed"
+        Pass = "Encryption Failed"
+        if args.format == "auto" or args.format == "normal":
+            UsrInputStr2Encrypt = args.encrypt
+            encryptedMsgandPass = encryptAutoGenandPass(UsrInputStr2Encrypt)
+            encryptedMsg = str(encryptedMsgandPass[0])
+            Pass = str(encryptedMsgandPass[1])
+            encryptedMsg = base64.b64encode(encryptedMsg.encode('latin-1')).decode('utf-8')
+        if args.format == "pure":
+            UsrInputStr2Encrypt = args.encrypt
+            encryptedMsgandPass = encryptAutoGenandPass(UsrInputStr2Encrypt)
+            encryptedMsg = str(encryptedMsgandPass[0])
+            Pass = str(encryptedMsgandPass[1])
+        print("encrypted:", encryptedMsg)
+        print("Password:", Pass)
+
+    elif args.decrypt:
+        Decrypted = "decryption failed"
+        if args.format == "auto":
+            if is_base64(args.decrypt):
+                args.format = "normal"
+                print("Detected normal mode")
+            else:
+                args.format == "pure"
+        if args.format == "normal":
+            UsrInputStr2Decrypt = base64.b64decode(args.decrypt).decode('latin-1')
+            UsrInputPswd = input("Password?\n")
+            Decrypted = decryptAutoGenandPass(UsrInputStr2Decrypt, UsrInputPswd)
+        if args.format == "pure":
+            UsrInputStr2Decrypt = args.decrypt
+            UsrInputPswd = input("Password?\n")
+            Decrypted = decryptAutoGenandPass(UsrInputStr2Decrypt, UsrInputPswd)
+        print("Decrypting..")
+        print(f"\nDecrypted message is:\n{RED}{Decrypted}{RESET}")
+    else:
+        print("No argument provided; Use -h to see manual")
 if __name__ == "__main__":
     main()

@@ -42,7 +42,11 @@ def decode_escape_sequences(s):
         except:
             # If all else fails, return original
             return s#print(random_string(5000))
-
+def is_base64(s: str) -> bool:
+    try:
+        return base64.b64encode(base64.b64decode(s)) == s.encode()
+    except Exception:
+        return False
 def encode_base64(text: str) -> str:
     """Encode string to base64"""
     return base64.b64encode(text.encode('utf-8')).decode('utf-8')
