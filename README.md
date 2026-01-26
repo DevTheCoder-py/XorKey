@@ -30,10 +30,7 @@ A Python library for working with XOR-based encryption and related utilities. De
 ### Linux
 ```
 cd ~
-git clone https://github.com/DevTheCoder-py/XorKey
-python -m venv env
-source env/bin/activate # if you are using fish/csh use source env/bin/activate.fish OR env/bin/activate.csh
-pipx install -e .
+pipx install git+https://github.com/DevTheCoder-py/XorKey/
 # All Done!
 ```
 
