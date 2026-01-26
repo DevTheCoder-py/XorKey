@@ -1,7 +1,6 @@
 # XORKey
 
-A Python library for working with XOR-based encryption and related utilities. Designed for simplicity, modularity, and ease of integration into other Python projects.
-
+A Python tool designed to encrypt arbitrary strings using XOR operations, offering multiple encryption configurations such as customizable keys, encoding formats, and output variations.
 ---
 
 ## Table of Contents
