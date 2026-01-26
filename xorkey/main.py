@@ -27,17 +27,16 @@ def main():
             )
     args = parser.parse_args()
     if args.encrypt:
-        UsrInputStr2Encrypt = args.encrypt 
+        UsrInputStr2Encrypt = decode_escape_sequences(args.encrypt) 
         encryptedMsgandPass = encryptAutoGenandPass(UsrInputStr2Encrypt)
         encryptedMsg = str(encryptedMsgandPass[0])
         Pass = str(encryptedMsgandPass[1])
         print("encrypted:",encryptedMsg)
         print("Password:", repr(Pass))
     if args.decrypt:
-        UsrInputStr2Decrypt = args.decrypt
+        UsrInputStr2Decrypt = decode_escape_sequences(args.decrypt)
         UsrInputPswd = input("Password?\n")
         print(decryptAutoGenandPass(UsrInputStr2Decrypt, UsrInputPswd)) 
-
     elif len(sys.argv) == 1:
         print("No arguement eprovided; Use -h to see manual")
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 import secrets
 import string
+import codecs
 def Xor2BinStrings(message, key):
     # although it implies it must me a msg and key, it will work with any as long as the bins are the same len 
     result = ""
@@ -10,7 +11,7 @@ def Xor2BinStrings(message, key):
 
 def random_string(length):
     chars = string.ascii_letters + string.digits + string.punctuation #add all possible assci 8 bit characters
-    chars = chars.replace('"', '').replace("'", '')
+    chars = chars.translate(str.maketrans('', '', "\"'''""„‟‛‚❛❜❝❞〝〞〟＂＇`´"))
     return ''.join(secrets.choice(chars) for _ in range(length)) #generate random
 
 def stringToBinStr(string):
@@ -27,7 +28,18 @@ def binary_to_ascii(bin_str):
         byte = bin_str[i:i+8]
         ascii_out += chr(int(byte, 2))
     return repr(ascii_out)
-
-#print(Xor2BinStrings("01011111111", "011010101010"))
+def decode_escape_sequences(s):
+    """Decode escape sequences in string, handling mixed content"""
+    try:
+        # First try: encode to bytes assuming it might have escape sequences
+        # This handles strings like "\x08V::\x18-"
+        return s.encode('utf-8').decode('unicode_escape')
+    except:
+        try:
+            # Second try: use codecs for unicode escape
+            return codecs.decode(s, 'unicode_escape')
+        except:
+            # If all else fails, return original
+            return s#print(random_string(5000))
 
 
