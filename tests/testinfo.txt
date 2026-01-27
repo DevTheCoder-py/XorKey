@@ -1,0 +1,1 @@
+I lowkey just used the test files to experiment code logic I didnt use pytest all that much

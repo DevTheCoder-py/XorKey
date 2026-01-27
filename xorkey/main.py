@@ -6,36 +6,44 @@ import sys
 from time import sleep
 RED = "\033[31m"
 RESET = "\033[0m"
+GREEN = "\033[0;32m"
 def main():
-    parser = argparse.ArgumentParser(description="A encryption software utilising XOR, pretty much unbreakable",
-                                     formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description="A command-line tool for XOR encryption and decryption.",
+        #formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=40)
+        formatter_class=argparse.RawTextHelpFormatter
+        )
     parser.add_argument(
-            "-e", "--encrypt",
-            type=str,
-            help = "Encrypt; Choice to use safe auto-generated pass-key(portable) or your own one(XorKey only)."
-            )
+        "-e", "--encrypt",
+        type=str,
+        metavar="<TEXT>",
+        help="Encrypt the given text. Use with -f to specify the output format."
+    )
     parser.add_argument(
-            "-d", "--decrypt",
-            type=str,
-            help = "--decrypt [str]"
-            )
+        "-d", "--decrypt",
+        type=str,
+        metavar="<CIPHER>",
+        help="Decrypt the given ciphertext. Use with -f to specify the input format."
+    )
     parser.add_argument(
-            "-f", "--format",
-            choices=['pure', 'normal', 'personal',"auto"],
-            default="auto",
-            help=("pure: raw encrypted output, no encoding;\n"
-                  "normal: standard base64 encoded output (default);\n"
-                  "personal: app-specific format;\n"
-                  "auto: same as normal;"
-                  )
-            )
+        "-f", "--format",
+        choices=['pure', 'OTP', 'personal', "auto"],
+        default="auto",
+        help=(
+            f"{RED}Specify the encryption/decryption format[OPTIONAL]:\n{RESET} "
+            " - pure: Raw encrypted output, no encoding.\n"
+            "  - OTP: Standard base64 encoded output.\n"
+            "  - personal: Use your own password [Still very secure]\n"
+            f"  - auto: Automatically detect the format during decryption {GREEN}(default){RESET}."
+        )
+    )
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
     print(f"DEBUG: args.format is {args.format}")
     if args.encrypt:
         encryptedMsg = "Encryption Failed"
         Pass = "Encryption Failed"
-        if args.format == "auto" or args.format == "normal":
+        if args.format == "auto" or args.format == "OTP":
             UsrInputStr2Encrypt = args.encrypt
             encryptedMsgandPass = encryptAutoGenandPass(UsrInputStr2Encrypt)
             encryptedMsg = str(encryptedMsgandPass[0])
@@ -51,13 +59,16 @@ def main():
 
     elif args.decrypt:
         Decrypted = "decryption failed"
+        autoState = False
         if args.format == "auto":
+            autoState = True
             if is_base64(args.decrypt):
-                args.format = "normal"
-                print("Detected normal mode")
+                args.format = "OTP"
+                print("Detected OTP mode")
             else:
-                args.format == "pure"
-        if args.format == "normal":
+                args.format = "pure"
+                print("Detected pure mode")
+        if args.format == "OTP":
             UsrInputStr2Decrypt = base64.b64decode(args.decrypt).decode('latin-1')
             UsrInputPswd = input("Password?\n")
             Decrypted = decryptAutoGenandPass(UsrInputStr2Decrypt, UsrInputPswd)

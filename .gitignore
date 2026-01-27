@@ -18,7 +18,7 @@ lib/
 lib64/
 parts/
 sdist/
-var/
+vhr<Down>
 wheels/
 share/python-wheels/
 *.egg-info/
@@ -207,4 +207,4 @@ marimo/_lsp/
 __marimo__/
 
 #other
-tests/
+
