@@ -4,6 +4,7 @@ import argcomplete
 import argparse
 import sys
 from time import sleep
+import os
 RED = "\033[31m"
 RESET = "\033[0m"
 GREEN = "\033[0;32m"
@@ -41,22 +42,25 @@ def main():
     args = parser.parse_args()
     print(f"DEBUG: args.format is {args.format}")
     if args.encrypt:
+        autoState = False
         encryptedMsg = "Encryption Failed"
         Pass = "Encryption Failed"
+        if args.format == "auto": autoState = True
         if args.format == "auto" or args.format == "OTP":
             UsrInputStr2Encrypt = args.encrypt
             encryptedMsgandPass = encryptAutoGenandPass(UsrInputStr2Encrypt)
             encryptedMsg = str(encryptedMsgandPass[0])
             Pass = str(encryptedMsgandPass[1])
-            encryptedMsg = base64.b64encode(encryptedMsg.encode('latin-1')).decode('utf-8')
+            encryptedMsg = base64.b64encode(encryptedMsg.encode('latin-1')).decode('utf-8') 
         if args.format == "pure":
             UsrInputStr2Encrypt = args.encrypt
             encryptedMsgandPass = encryptAutoGenandPass(UsrInputStr2Encrypt)
-            encryptedMsg = str(encryptedMsgandPass[0])
-            Pass = str(encryptedMsgandPass[1])
+            encryptedMsg = repr(encryptedMsgandPass[0])
+            Pass = repr(encryptedMsgandPass[1])
         print("encrypted:", encryptedMsg)
         print("Password:", Pass)
-
+        if autoState: print(f"\n{RED}Format not specified, defaulted to OTP mode{RESET}")
+        if args.format == "pure": print(f"{RED}Warning: Using pure mode is not very supported as it may result in truncation of text{RESET}")
     elif args.decrypt:
         Decrypted = "decryption failed"
         autoState = False
@@ -73,12 +77,24 @@ def main():
             UsrInputPswd = input("Password?\n")
             Decrypted = decryptAutoGenandPass(UsrInputStr2Decrypt, UsrInputPswd)
         if args.format == "pure":
-            UsrInputStr2Decrypt = args.decrypt
+            UsrInputStr2Decrypt = decode_escape_sequences(args.decrypt) #convert repr to ascii; may result in obfuscation
             UsrInputPswd = input("Password?\n")
             Decrypted = decryptAutoGenandPass(UsrInputStr2Decrypt, UsrInputPswd)
         print("Decrypting..")
         print(f"\nDecrypted message is:\n{RED}{Decrypted}{RESET}")
+        if autoState: print(f"\n{RED}{args.format} mode was detected. If output was unexpected, try using -f to choose decryption method manually.")
+        print("\nNote: Decryption does not guarantee of authencity of message")
     else:
         print("No argument provided; Use -h to see manual")
-if __name__ == "__main__":
-    main()
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        print('Interrupted')
+        try:
+            sys.exit(130)
+        except SystemExit:
+            os._exit(130)
+
