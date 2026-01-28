@@ -87,7 +87,11 @@ def main():
                 args.format = "pure"
                 print("Detected pure mode")
         if args.format == "OTP":
-            UsrInputStr2Decrypt = base64.b64decode(args.decrypt).decode('latin-1')
+            try:
+                UsrInputStr2Decrypt = base64.b64decode(args.decrypt).decode('latin-1')
+            except Exception as e:
+                print(f"Decryption Error: Are you using the right format? DEBUG:{e}")
+                exit()
             UsrInputPswd = input("Password?\n")
             Decrypted = decryptAutoGenandPass(UsrInputStr2Decrypt, UsrInputPswd)
         if args.format == "pure":

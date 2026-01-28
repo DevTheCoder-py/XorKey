@@ -55,17 +55,21 @@ def encryptCustomPass(msg, Pass) -> str:
 
 def decryptCustomPass(msg: str, Pass: str) -> str:
     Esalt, encryptedMsg = msg.split(":", 1)
-    salt = base64.b64decode(Esalt.encode("utf-8"))
-    encryptedMsgBytes = ast.literal_eval(encryptedMsg)
-    encryptedBin = bytesToBinStr(encryptedMsgBytes)
-    keystreamBytes = generate_keystream(Pass, len(encryptedMsgBytes), salt)
-    keystreamBin = bytesToBinStr(keystreamBytes)
-    assert len(encryptedBin) == len(keystreamBin), (
-        f"Length mismatch: encryptedBin={len(encryptedBin)}, keystreamBin={len(keystreamBin)}"
-    )
-    decryptedBin = Xor2BinStrings(encryptedBin, keystreamBin)
-    decryptedBytes = binStrToBytes(decryptedBin)
-    decryptedMsg = decryptedBytes.decode("utf-8")
+    try:
+        salt = base64.b64decode(Esalt.encode("utf-8"))
+        encryptedMsgBytes = ast.literal_eval(encryptedMsg)
+        encryptedBin = bytesToBinStr(encryptedMsgBytes)
+        keystreamBytes = generate_keystream(Pass, len(encryptedMsgBytes), salt)
+        keystreamBin = bytesToBinStr(keystreamBytes)
+        assert len(encryptedBin) == len(keystreamBin), (
+            f"Length mismatch: encryptedBin={len(encryptedBin)}, keystreamBin={len(keystreamBin)}"
+        )
+        decryptedBin = Xor2BinStrings(encryptedBin, keystreamBin)
+        decryptedBytes = binStrToBytes(decryptedBin)
+        decryptedMsg = decryptedBytes.decode("utf-8")
+    except UnicodeDecodeError:
+        print("Decryption Failed: Is password correct?")
+        exit()
 
     return decryptedMsg
 

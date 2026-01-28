@@ -65,9 +65,16 @@ def encode_base64(text) -> str:
         text = text.encode('utf-8')
     return base64.b64encode(text).decode('utf-8')
 
-def decode_base64(encoded: str) -> str:
+def decode_base64(encoded: str):
     """Decode base64 to string"""
-    return base64.b64decode(encoded.encode('utf-8')).decode('utf-8')
+    try:
+        return base64.b64decode(encoded.encode('utf-8')).decode('utf-8')
+    except UnicodeDecodeError:
+        print("Decryption failed: Are you using the right format?(UniDecError)")
+        exit()
+    except Exception as e:
+        print("Decryption failed: Are you using the writte format?(BinPadErr)")
+        exit()
 def seperateSaltandMsg(Message):
     salt, msg = Message.split(':', maxsplit=1)
     return salt, msg
