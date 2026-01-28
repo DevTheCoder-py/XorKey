@@ -5,10 +5,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xorkey"
-version = "0.2"
+version = "0.3"
 authors = [{name="DevTheCoder-py"}]
 dependencies = [
-    "argcomplete>=3.0,<4"
+  #  "argcomplete>=3.0,<4"
 ]
 
 

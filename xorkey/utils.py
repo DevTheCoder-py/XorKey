@@ -29,6 +29,18 @@ def binary_to_ascii(bin_str):
         byte = bin_str[i:i+8]
         ascii_out += chr(int(byte, 2))
     return ascii_out
+
+def bytesToBinStr(b: bytes) -> str:
+    return ''.join(f'{byte:08b}' for byte in b)
+
+def binStrToBytes(s: str) -> bytes:
+    if len(s) % 8 != 0:
+        raise ValueError("Binary string length must be a multiple of 8")
+
+    return bytes(
+        int(s[i:i+8], 2)
+        for i in range(0, len(s), 8)
+    )
 def decode_escape_sequences(s):
     """Decode escape sequences in string, handling mixed content"""
     try:
@@ -47,12 +59,15 @@ def is_base64(s: str) -> bool:
         return base64.b64encode(base64.b64decode(s)) == s.encode()
     except Exception:
         return False
-def encode_base64(text: str) -> str:
-    """Encode string to base64"""
-    return base64.b64encode(text.encode('utf-8')).decode('utf-8')
+def encode_base64(text) -> str:
+    if isinstance(text, str):
+        #im checking  if its a string. if it is, we need to encode it to bytes
+        text = text.encode('utf-8')
+    return base64.b64encode(text).decode('utf-8')
 
 def decode_base64(encoded: str) -> str:
     """Decode base64 to string"""
     return base64.b64decode(encoded.encode('utf-8')).decode('utf-8')
-
-
+def seperateSaltandMsg(Message):
+    salt, msg = Message.split(':', maxsplit=1)
+    return salt, msg

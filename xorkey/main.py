@@ -32,8 +32,8 @@ def main():
         default="auto",
         help=(
             f"{RED}Specify the encryption/decryption format[OPTIONAL]:\n{RESET} "
-            " - pure: Raw encrypted output, no encoding.\n"
-            "  - OTP: Standard base64 encoded output.\n"
+            " - pure: Same as OTP but no encoding or authenthication feautures allowing you to use pure binary\n"
+            "  - OTP: Standard base64 encoded output. DEFAULT\n"
             "  - personal: Use your own password [Still very secure]\n"
             f"  - auto: Automatically detect the format during decryption {GREEN}(default){RESET}."
         )
@@ -41,6 +41,8 @@ def main():
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
     print(f"DEBUG: args.format is {args.format}")
+
+    #if encrypt mode:
     if args.encrypt:
         autoState = False
         encryptedMsg = "Encryption Failed"
@@ -57,16 +59,28 @@ def main():
             encryptedMsgandPass = encryptAutoGenandPass(UsrInputStr2Encrypt)
             encryptedMsg = repr(encryptedMsgandPass[0])
             Pass = repr(encryptedMsgandPass[1])
+        if args.format == "personal":
+            UsrInputStr2Encrypt = args.encrypt
+            Pass = input("Enter password for encryption:\n")
+            encryptedMsg = encode_base64(encryptCustomPass(UsrInputStr2Encrypt, Pass)) + "<PERSONAL>"
+            Pass = r'---\HIDDEN/---'
+
         print("encrypted:", encryptedMsg)
         print("Password:", Pass)
         if autoState: print(f"\n{RED}Format not specified, defaulted to OTP mode{RESET}")
-        if args.format == "pure": print(f"{RED}Warning: Using pure mode is not very supported as it may result in truncation of text{RESET}")
+        if args.format == "pure": print(f"{RED}Warning: Using pure mode is not very supported as it may result in truncation of text. Should work fine most of the time.{RESET}")
+
+    #if decrypt mode
     elif args.decrypt:
         Decrypted = "decryption failed"
         autoState = False
         if args.format == "auto":
             autoState = True
-            if is_base64(args.decrypt):
+            if "<PERSONAL>" in args.decrypt:
+                args.decrypt = args.decrypt.removesuffix("<PERSONAL>")
+                print("Detected personal mode")
+                args.format = "personal"
+            elif is_base64(args.decrypt):
                 args.format = "OTP"
                 print("Detected OTP mode")
             else:
@@ -80,10 +94,16 @@ def main():
             UsrInputStr2Decrypt = decode_escape_sequences(args.decrypt) #convert repr to ascii; may result in obfuscation
             UsrInputPswd = input("Password?\n")
             Decrypted = decryptAutoGenandPass(UsrInputStr2Decrypt, UsrInputPswd)
+        if args.format == "personal":
+           UsrInputStr2Decrypt = decode_base64(args.decrypt)
+           UsrInputPswd = input("Password?\n")
+           Decrypted = decryptCustomPass(UsrInputStr2Decrypt, UsrInputPswd)
+
+        
         print("Decrypting..")
         print(f"\nDecrypted message is:\n{RED}{Decrypted}{RESET}")
         if autoState: print(f"\n{RED}{args.format} mode was detected. If output was unexpected, try using -f to choose decryption method manually.")
-        print("\nNote: Decryption does not guarantee of authencity of message")
+        if args.format == "pure": print("\nNote: Due to the nature of pure mode, authenticity of message cannot be guaranteed.")
     else:
         print("No argument provided; Use -h to see manual")
 
