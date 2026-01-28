@@ -1,6 +1,7 @@
 from xorkey.core import *
 from xorkey.utils import *
 import argcomplete
+from getpass import getpass
 import argparse
 import sys
 from time import sleep
@@ -33,8 +34,8 @@ def main():
         help=(
             f"{RED}Specify the encryption/decryption format[OPTIONAL]:\n{RESET} "
             " - pure: Same as OTP but no encoding or authenthication feautures allowing you to use pure binary\n"
-            "  - OTP: Standard base64 encoded output. DEFAULT\n"
-            "  - personal: Use your own password [Still very secure]\n"
+            "  - OTP: Standard base64 encoded output. DEFAULT[RECOMMENDED]\n"
+            "  - personal: Use your own password [RECOMMENDED]\n"
             f"  - auto: Automatically detect the format during decryption {GREEN}(default){RESET}."
         )
     )
@@ -61,7 +62,7 @@ def main():
             Pass = repr(encryptedMsgandPass[1])
         if args.format == "personal":
             UsrInputStr2Encrypt = args.encrypt
-            Pass = input("Enter password for encryption:\n")
+            Pass = getpass()
             encryptedMsg = encode_base64(encryptCustomPass(UsrInputStr2Encrypt, Pass)) + "<PERSONAL>"
             Pass = r'---\HIDDEN/---'
 
@@ -92,15 +93,15 @@ def main():
             except Exception as e:
                 print(f"Decryption Error: Are you using the right format? DEBUG:{e}")
                 exit()
-            UsrInputPswd = input("Password?\n")
+            UsrInputPswd = getpass()
             Decrypted = decryptAutoGenandPass(UsrInputStr2Decrypt, UsrInputPswd)
         if args.format == "pure":
             UsrInputStr2Decrypt = decode_escape_sequences(args.decrypt) #convert repr to ascii; may result in obfuscation
-            UsrInputPswd = input("Password?\n")
+            UsrInputPswd = getpass()
             Decrypted = decryptAutoGenandPass(UsrInputStr2Decrypt, UsrInputPswd)
         if args.format == "personal":
            UsrInputStr2Decrypt = decode_base64(args.decrypt)
-           UsrInputPswd = input("Password?\n")
+           UsrInputPswd = getpass()
            Decrypted = decryptCustomPass(UsrInputStr2Decrypt, UsrInputPswd)
 
         
