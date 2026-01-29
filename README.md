@@ -10,7 +10,7 @@
 
 ## 📖 Table of Contents
 
-- [✨ Key Features](#-key-features)
+- [✨ Key Features](#-key-meatures)
 - [⚙️ How It Works](#️-how-it-works)
 - [💾 Installation](#-installation)
 - [🚀 Usage](#-usage)
@@ -30,7 +30,7 @@
     - **Pure:** A raw binary mode for special use cases.
 - ** Automatic Format Detection:** Can automatically detect the encryption format during decryption.
 - ** Multiple Output Formats:** Supports Base64 and raw binary output.
-- ** Command-Line Interface:** A user-friendly CLI for easy encryption and decryption directly from your terminal.
+- ** Command-Line Interface:** A user-mriendly CLI for easy encryption and decryption directly from your terminal.
 - ** Modular Design:** The project is structured into logical modules, making it easy to understand, maintain, and extend.
 
 ---
@@ -95,7 +95,7 @@ This will output the Base64 encoded encrypted message and the randomly generated
 **Using Personal Mode:**
 
 ```bash
-xorkey -e "My secret message" -f personal
+xorkey -e "My secret message" -m personal
 ```
 
 You will be prompted to enter a password for encryption.
@@ -116,13 +116,33 @@ If auto-detection fails, you can specify the mode manually.
 
 ```bash
 # For OTP mode
-xorkey -d "<ENCRYPTED_MESSAGE>" -f OTP
+xorkey -d "<ENCRYPTED_MESSAGE>" -m OTP
 
 # For Personal mode
-xorkey -d "<ENCRYPTED_MESSAGE>" -f personal
+xorkey -d "<ENCRYPTED_MESSAGE>" -m personal
 ```
 
 You will be prompted for the password.
+
+### Encrypting/Decrypting Files
+
+XORKey can also encrypt or decrypt the content of a file.
+
+**Encrypting a File:**
+
+```bash
+xorkey -e -f input.txt -o encrypted.txt
+```
+
+This command reads the content of `input.txt`, encrypts it (using OTP mode by default, or personal mode if `-m personal` is specified), and writes the encrypted output to `encrypted.txt`.
+
+**Decrypting a File:**
+
+```bash
+xorkey -d -f encrypted.txt -o decrypted.txt
+```
+
+This command reads the content of `encrypted.txt`, decrypts it (automatically detecting the mode or using the specified mode), and writes the decrypted output to `decrypted.txt`. You will be prompted for a password if necessary.
 
 ---
 
