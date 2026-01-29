@@ -63,13 +63,13 @@ def main():
         if args.mode == "auto": autoState = True
         if args.mode == "auto" or args.mode == "OTP":
             UsrInputStr2Encrypt = args.encrypt
-            encryptedMsgandPass = encryptAutoGenandPass(UsrInputStr2Encrypt)
+            encryptedMsgandPass = encryptWithMode(UsrInputStr2Encrypt, "OTP")
             encryptedMsg = str(encryptedMsgandPass[0])
             Pass = str(encryptedMsgandPass[1])
             encryptedMsg = base64.b64encode(encryptedMsg.encode('latin-1')).decode('utf-8') 
         if args.mode == "pure":
             UsrInputStr2Encrypt = args.encrypt
-            encryptedMsgandPass = encryptAutoGenandPass(UsrInputStr2Encrypt)
+            encryptedMsgandPass = encryptWithMode(UsrInputStr2Encrypt, "pure")
             encryptedMsg = repr(encryptedMsgandPass[0])
             Pass = repr(encryptedMsgandPass[1])
         if args.mode == "personal":

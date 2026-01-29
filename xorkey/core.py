@@ -40,6 +40,43 @@ def decryptAutoGenandPass(string, password):
     originalMsg = binary_to_ascii(Xor2BinStrings(encryptedBin, passwordBin))
     return originalMsg
 
+class AuthError(Exception):
+    """Raised when message authenticity verification fails."""
+    pass
+
+def encryptWithMode(string, mode="pure"):
+    encrypted, password = encryptAutoGenandPass(string)
+    
+    if mode == "OTP":
+        # Use bytes to avoid encoding issues
+        mac = hmac.new(password.encode(), encrypted.encode(), hashlib.sha256).hexdigest()
+        encrypted = f"{encrypted}:{mac}"
+    
+    return encrypted, password
+
+def decryptWithMode(encryptedMsg, password: str, mode: str):
+    if mode == "OTP" or "auto":
+        try:
+            encrypted, received_mac = encryptedMsg.rsplit(":", 1)
+        except ValueError:
+            raise ValueError("Invalid format: missing MAC")
+        
+        # Compute expected MAC
+        expected_mac = hmac.new(password.encode(), encrypted.encode(), hashlib.sha256).hexdigest()
+        
+        # Compare securely
+        if not hmac.compare_digest(received_mac, expected_mac):
+            raise AuthError("Message authentication failed: tampered or corrupted")
+        
+        # Only decrypt if MAC verified
+        return decryptAutoGenandPass(encrypted, password)
+    
+    elif mode == "pure":
+        # No authentication check in pure mode
+        return decryptAutoGenandPass(encryptedMsg, password)
+    
+    else:
+        raise ValueError("Unknown mode")
 def encryptCustomPass(msg, Pass) -> str:
     salt = generate_salt()
     msgBytes = msg.encode("utf-8")
