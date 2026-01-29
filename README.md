@@ -20,7 +20,8 @@
 
 ---
 ## > [!NOTE]
-> This is a beginner project and is probably not up to standard and the code may be badly structured; I tried my best with minimal A.I usage(except this readme lol)
+> This is a beginner project and is probably not up to standard and the code may be badly structured; I tried my best with minimal A.I usage(except this readme lol).
+The use of ast.literal_eval() could pose some vurnerabilities if used in a server environment.
 ## ✨ Key Features
 
 - **🔒 Core XOR Encryption/Decryption:** Implements the fundamental XOR cipher for fast and secure data encryption.
@@ -42,7 +43,7 @@ XORKey encrypts data by XORing it with a generated keystream. The way the keystr
 - **OTP Mode:** A cryptographically secure random password is generated for each encryption. This password, combined with the encrypted message, forms a one-time pad. This is the most secure mode.(Well not yet, authenthencitity verification has not been implemented yet)
 - **Personal Mode:** A user-provided password is used to derive a secure key using PBKDF2 with a random salt. This method is also very secure and allows you to use a memorable password.
 
-The CLI (`xorkey.main`) provides a simple interface to these encryption methods, handling input/output and formatting.
+The CLI (`xorkey`) provides a simple interface to these encryption methods, handling input/output and formatting.
 
 ---
 
@@ -99,6 +100,7 @@ xorkey -e "My secret message" -m personal
 ```
 
 You will be prompted to enter a password for encryption.
+The method for encryption uses a randomly generated salt and given password to generate a keystream to securely XOR the message.
 
 ### Decrypting Data
 
@@ -145,7 +147,7 @@ To decrypt the content of `encrypted.txt` and save it to `decrypted.txt`:
 xorkey -d -f encrypted.txt -o decrypted.txt
 ```
 
-This command reads the content of `encrypted.txt` and decrypts it. If the file was encrypted in `OTP` or `pure` mode, it will automatically look for the password in `encrypted.pass`. If you used `personal` mode, you will be prompted for your password.
+This command reads the content of `encrypted.txt` and decrypts it. If the file was encrypted in `OTP` or `pure` mode, it will automatically look for the password in `encrypted.pass`(or whatever file name of the encrypted file is +.pass. If you used `personal` mode, you will be prompted for your password.
 
 ---
 
