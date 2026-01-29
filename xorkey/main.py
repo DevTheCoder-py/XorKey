@@ -38,8 +38,8 @@ def main():
         help=(
             f"{RED}Specify the encryption/decryption mode[OPTIONAL]:\n{RESET} "
             " - pure: Same as OTP but no encoding or authenthication feautures allowing you to use pure binary\n"
-            "  - OTP: Standard base64 encoded output. DEFAULT[RECOMMENDED]\n"
-            "  - personal: Use your own password [RECOMMENDED]\n"
+            f"  - OTP: Standard base64 encoded output. DEFAULT FOR ENCRYPTION {RED}[RECOMMENDED]{RESET}\n"
+            f"  - personal: Use your own password; Uses extremely secure methods {RED}[RECOMMENDED]{RESET}\n"
             f"  - auto: Automatically detect the mode during decryption {GREEN}(default){RESET}."
         )
     )
@@ -47,8 +47,8 @@ def main():
     parser.add_argument(
         "-f", "--file",
         nargs='*',
-        metavar=('FILENAMES[Encrypted, Password, Decrypted]'),
-        help="EncryptedMessageFilename, PasswordFilename, DecryptedMessageFilename"
+        metavar=('FILENAMES{Encrypted, Password, Decrypted}'),
+        help="[EncryptedMessageFilename], [PasswordFilename], [DecryptedMessageFilename]\nIf in used in conjuction with personal mode Password file will be ignored"
     )
 
     argcomplete.autocomplete(parser)
@@ -82,6 +82,23 @@ def main():
         print("Password:", Pass)
         if autoState: print(f"\n{RED}mode not specified, defaulted to OTP mode{RESET}")
         if args.mode == "pure": print(f"{RED}Warning: Using pure mode is not very supported as it may result in truncation of text. Should work fine most of the time.{RESET}")
+
+        if args.file is not None:
+            if len(args.file) == 0:
+                pass
+            if len(args.file) > 3 and len(args.file) != 0:
+                parser.error("-f only accepts 3 arguements at most")
+            args.file = args.file + defaultsfn[len(args.file):]
+            # Always write the encrypted message to file, regardless of mode.
+            with open(args.file[0], 'w') as f:
+                f.write(encryptedMsg)
+            with open(args.file[1], 'w') as f:
+                f.write(Pass)
+            print(f"\n{GREEN}Encrypted message written to {args.file[0]}{RESET}")
+            if args.mode == 'personal':
+                print(f"{GREEN}Password for personal mode is not saved. File '{args.file[1]}' contains a placeholder.{RESET}")
+            else:
+                print(f"{GREEN}Password written to {args.file[1]}{RESET}")
 
     #if decrypt mode
     elif args.decrypt is not None or args.file is not None:
