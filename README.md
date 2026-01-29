@@ -130,19 +130,22 @@ XORKey can also encrypt or decrypt the content of a file.
 
 **Encrypting a File:**
 
+To encrypt the content of `my_secret.txt` and save it to `encrypted.txt`:
 ```bash
-xorkey -e -f input.txt -o encrypted.txt
+xorkey -e -f my_secret.txt -o encrypted.txt
 ```
 
-This command reads the content of `input.txt`, encrypts it (using OTP mode by default, or personal mode if `-m personal` is specified), and writes the encrypted output to `encrypted.txt`.
+This command reads the content of `my_secret.txt`, encrypts it, and writes the encrypted output to `encrypted.txt`. 
+If you are using `OTP` or `pure` mode, a password file named `encrypted.pass` will be created in the same directory.
 
 **Decrypting a File:**
 
+To decrypt the content of `encrypted.txt` and save it to `decrypted.txt`:
 ```bash
 xorkey -d -f encrypted.txt -o decrypted.txt
 ```
 
-This command reads the content of `encrypted.txt`, decrypts it (automatically detecting the mode or using the specified mode), and writes the decrypted output to `decrypted.txt`. You will be prompted for a password if necessary.
+This command reads the content of `encrypted.txt` and decrypts it. If the file was encrypted in `OTP` or `pure` mode, it will automatically look for the password in `encrypted.pass`. If you used `personal` mode, you will be prompted for your password.
 
 ---
 

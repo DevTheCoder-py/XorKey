@@ -10,26 +10,25 @@ RED = "\033[31m"
 RESET = "\033[0m"
 GREEN = "\033[0;32m"
 def main():
-    defaultsfn =  ["Encrypted.txt","Password.txt","Decrypted.txt"]
     parser = argparse.ArgumentParser(
         description="A command-line tool for XOR encryption and decryption.",
-        #modeter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=40)
         formatter_class=argparse.RawTextHelpFormatter
-        )
+    )
     parser.add_argument(
         "-e", "--encrypt",
-        type=str,
+        nargs='?',
+        const=True,
         default=None,
         metavar="<TEXT>",
-        help="Encrypt the given text. Use with -f to specify the output mode."
+        help="Encrypt the given text. If used with -f, the content of the file will be encrypted."
     )
     parser.add_argument(
         "-d", "--decrypt",
         nargs='?',
-        type=str,
+        const=True,
         default=None,
         metavar="<CIPHER>",
-        help="Decrypt the given ciphertext. Use with -f to specify the input mode."
+        help="Decrypt the given ciphertext. If used with -f, the content of the file will be decrypted."
     )
     parser.add_argument(
         "-m", "--mode",
@@ -43,140 +42,145 @@ def main():
             f"  - auto: Automatically detect the mode during decryption {GREEN}(default){RESET}."
         )
     )
-
     parser.add_argument(
         "-f", "--file",
-        nargs='*',
-        metavar=('FILENAMES{Encrypted, Password, Decrypted}'),
-        help="[EncryptedMessageFilename], [PasswordFilename], [DecryptedMessageFilename]\nIf in used in conjuction with personal mode Password file will be ignored"
+        type=str,
+        metavar="<FILE>",
+        help="Specify an input file for encryption or decryption."
+    )
+    parser.add_argument(
+        "-o", "--output",
+        type=str,
+        metavar="<FILE>",
+        help="Specify the output file for encryption or decryption."
     )
 
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
-    print(f"DEBUG: args.mode is {args.mode}")
 
-    #if encrypt mode:
     if args.encrypt:
-        autoState = False
+        # --- Encryption Flow ---
+        input_text = ""
+        if args.file:
+            try:
+                with open(args.file, 'r') as f:
+                    input_text = f.read()
+            except FileNotFoundError:
+                parser.error(f"Input file not found: {args.file}")
+        elif isinstance(args.encrypt, str):
+            input_text = args.encrypt
+        else:
+            parser.error("No input provided for encryption. Use -e <text> or -f <file>.")
+
         encryptedMsg = "Encryption Failed"
         Pass = "Encryption Failed"
-        if args.mode == "auto": autoState = True
-        if args.mode == "auto" or args.mode == "OTP":
-            UsrInputStr2Encrypt = args.encrypt
-            encryptedMsgandPass = encryptWithMode(UsrInputStr2Encrypt, "OTP")
+        
+        mode = args.mode
+        if mode == "auto":
+            mode = "OTP" # Default to OTP for encryption
+
+        if mode == "OTP":
+            encryptedMsgandPass = encryptWithMode(input_text, "OTP")
             encryptedMsg = str(encryptedMsgandPass[0])
             Pass = str(encryptedMsgandPass[1])
-            encryptedMsg = base64.b64encode(encryptedMsg.encode('latin-1')).decode('utf-8') 
-        if args.mode == "pure":
-            UsrInputStr2Encrypt = args.encrypt
-            encryptedMsgandPass = encryptWithMode(UsrInputStr2Encrypt, "pure")
+            encryptedMsg = base64.b64encode(encryptedMsg.encode('latin-1')).decode('utf-8')
+        elif mode == "pure":
+            encryptedMsgandPass = encryptWithMode(input_text, "pure")
             encryptedMsg = repr(encryptedMsgandPass[0])
             Pass = repr(encryptedMsgandPass[1])
-        if args.mode == "personal":
-            UsrInputStr2Encrypt = args.encrypt
+        elif mode == "personal":
             Pass = getpass()
-            encryptedMsg = encode_base64(encryptCustomPass(UsrInputStr2Encrypt, Pass)) + "<PERSONAL>"
+            encryptedMsg = encode_base64(encryptCustomPass(input_text, Pass)) + "<PERSONAL>"
             Pass = r'---\HIDDEN/---'
-
-        print("encrypted:", encryptedMsg)
-        print("Password:", Pass)
-        if autoState: print(f"\n{RED}mode not specified, defaulted to OTP mode{RESET}")
-        if args.mode == "pure": print(f"{RED}Warning: Using pure mode is not very supported as it may result in truncation of text. Should work fine most of the time.{RESET}")
-
-        if args.file is not None:
-            if len(args.file) == 0:
-                pass
-            if len(args.file) > 3 and len(args.file) != 0:
-                parser.error("-f only accepts 3 arguements at most")
-            args.file = args.file + defaultsfn[len(args.file):]
-            # Always write the encrypted message to file, regardless of mode.
-            with open(args.file[0], 'w') as f:
-                f.write(encryptedMsg)
-            with open(args.file[1], 'w') as f:
-                f.write(Pass)
-            print(f"\n{GREEN}Encrypted message written to {args.file[0]}{RESET}")
-            if args.mode == 'personal':
-                print(f"{GREEN}Password for personal mode is not saved. File '{args.file[1]}' contains a placeholder.{RESET}")
-            else:
-                print(f"{GREEN}Password written to {args.file[1]}{RESET}")
-
-    #if decrypt mode
-    elif args.decrypt is not None or args.file is not None:
-        Decrypted = "decryption failed"
-        autoState = False
-        AllowNormal = True
-        FileUsageState = False
-        if True:
-            if args.file is None and args.decrypt is None:
-                parser.error("No arguement for decryption given and no filename was specified")
-            if args.file is not None and args.decrypt is not None:
-                parser.error("When -f is specified, -d must have no arguements")
-            if args.file is not None:
-                if len(args.file) == 0:
-                    pass
-                if len(args.file) > 3 and len(args.file) != 0:
-                    parser.error("-f only accepts 3 arguements at most")
-                args.file = args.file + defaultsfn[len(args.file):]
-                AllowNormal = False
-                FileUsageState = True
-                try:
-                    with open(args.file[0], 'r') as f:
-                        args.decrypt = f.read().strip() # it took so long to figure out  but stripping is required for auto detection to work as expected
-                    if args.mode != "personal":
-                        with open(args.file[1], 'r') as f:
-                            Password = f.read()
-                    elif args.mode == "personal":
-                        AllowNormal = True
-                except FileNotFoundError:
-                    print("Error: The file was not found.(Encrypted File or Password File)")
-                except Exception as e:
-                    print(f"An error occurred: {e}")
-
-            if AllowNormal or args.mode == "personal":
-                print("false")
-                print(args.mode)
-                Password = getpass()
-            
-
-        if args.mode == "auto":
-            autoState = True
-            if "<PERSONAL>" in args.decrypt:
-                args.decrypt = args.decrypt.removesuffix("<PERSONAL>")
-                print("Detected personal mode")
-                args.mode = "personal"
-            elif is_base64(args.decrypt):
-                args.mode = "OTP"
-                print("Detected OTP mode")
-            else:
-                args.mode = "pure"
-                print("Detected pure mode")
-        if args.mode == "OTP":
+        
+        if args.output:
             try:
-                UsrInputStr2Decrypt = base64.b64decode(args.decrypt).decode('latin-1')
+                with open(args.output, 'w') as f:
+                    f.write(encryptedMsg)
+                print(f"{GREEN}Encrypted message written to {args.output}{RESET}")
+                if mode != 'personal':
+                     # also write password to a file
+                    pass_file = os.path.splitext(args.output)[0] + ".pass"
+                    with open(pass_file, 'w') as f:
+                        f.write(Pass)
+                    print(f"{GREEN}Password written to {pass_file}{RESET}")
+
             except Exception as e:
-                print(f"Decryption Error: Are you using the right mode? DEBUG:{e}")
-                exit()
-            UsrInputPswd = Password
-            Decrypted = decryptAutoGenandPass(UsrInputStr2Decrypt, UsrInputPswd)
-        if args.mode == "pure":
-            UsrInputStr2Decrypt = decode_escape_sequences(args.decrypt) #convert repr to ascii; may result in obfuscation
-            UsrInputPswd = Password
-            Decrypted = decryptAutoGenandPass(UsrInputStr2Decrypt, UsrInputPswd)
-        if args.mode == "personal":
-           UsrInputStr2Decrypt = decode_base64(args.decrypt)
-           UsrInputPswd = Password
-           Decrypted = decryptCustomPass(UsrInputStr2Decrypt, UsrInputPswd)
-        if args.file is None:
+                parser.error(f"Could not write to output file: {e}")
+        else:
+            print("encrypted:", encryptedMsg)
+            print("Password:", Pass)
+
+    elif args.decrypt:
+        # --- Decryption Flow ---
+        input_cipher = ""
+        if args.file:
+            try:
+                with open(args.file, 'r') as f:
+                    input_cipher = f.read().strip()
+            except FileNotFoundError:
+                parser.error(f"Input file not found: {args.file}")
+        elif isinstance(args.decrypt, str):
+            input_cipher = args.decrypt
+        else:
+            parser.error("No input provided for decryption. Use -d <cipher> or -f <file>.")
+
+        Decrypted = "decryption failed"
+        mode = args.mode
+
+        if mode == "auto":
+            if "<PERSONAL>" in input_cipher:
+                mode = "personal"
+            elif is_base64(input_cipher):
+                mode = "OTP"
+            else:
+                mode = "pure"
+            print(f"Detected {mode} mode")
+
+        Password = ""
+        if mode == "personal":
+            Password = getpass("Enter password: ")
+            input_cipher = input_cipher.removesuffix("<PERSONAL>")
+        elif mode in ["OTP", "pure"]:
+             # Try to read password from file or ask user
+            pass_file = ""
+            if args.file:
+                pass_file = os.path.splitext(args.file)[0] + ".pass"
+            
+            try:
+                with open(pass_file, 'r') as f:
+                    Password = f.read()
+                print(f"Read password from {pass_file}")
+            except (FileNotFoundError, IOError):
+                 Password = getpass("Enter password: ")
+
+
+        if mode == "OTP":
+            try:
+                UsrInputStr2Decrypt = base64.b64decode(input_cipher).decode('latin-1')
+                Decrypted = decryptAutoGenandPass(UsrInputStr2Decrypt, Password)
+            except Exception as e:
+                parser.error(f"Decryption Error: {e}")
+        elif mode == "pure":
+            UsrInputStr2Decrypt = decode_escape_sequences(input_cipher)
+            Decrypted = decryptAutoGenandPass(UsrInputStr2Decrypt, Password)
+        elif mode == "personal":
+            UsrInputStr2Decrypt = decode_base64(input_cipher)
+            Decrypted = decryptCustomPass(UsrInputStr2Decrypt, Password)
+
+        if args.output:
+            try:
+                with open(args.output, 'w') as f:
+                    f.write(Decrypted)
+                print(f"{GREEN}Decrypted message written to {args.output}{RESET}")
+            except Exception as e:
+                parser.error(f"Could not write to output file: {e}")
+        else:
             print(f"\nDecrypted message is:\n{RED}{Decrypted}{RESET}")
-            if autoState: print(f"\n{RED}{args.mode} mode was detected. If output was unexpected, try using -f to choose decryption method manually.")
-            if args.mode == "pure": print("\nNote: Due to the nature of pure mode, authenticity of message cannot be guaranteed.")
-        if args.file is not None:
-            with open(args.file[2], 'w') as f:
-                f.write(Decrypted)
-        if FileUsageState:
-            print(f"Decrypted output has been transferred to {args.file[2]}")
+
     else:
-        print("No argument provided; Use -h to see manual")
+        parser.print_help()
+
 
 
 if __name__ == '__main__':
