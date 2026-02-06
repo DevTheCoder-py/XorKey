@@ -37,8 +37,8 @@ def main():
         help=(
             f"{RED}Specify the encryption/decryption mode[OPTIONAL]:\n{RESET} "
             " - pure: Same as OTP but no encoding or authenthication feautures allowing you to use pure binary\n"
-            f"  - OTP: Standard base64 encoded output. DEFAULT FOR ENCRYPTION {RED}[RECOMMENDED]{RESET}\n"
-            f"  - personal: Use your own password; Uses extremely secure methods {RED}[RECOMMENDED]{RESET}\n"
+            f"  - OTP: Standard base64 encoded output.{RED}[RECOMMENDED]{RESET}\n"
+            f"  - personal: Use your own password; Uses extremely secure methods. DEFAULT FOR ENCRYPTION {RED}[RECOMMENDED]{RESET}\n"
             f"  - auto: Automatically detect the mode during decryption {GREEN}(default){RESET}."
         )
     )
@@ -77,7 +77,7 @@ def main():
         
         mode = args.mode
         if mode == "auto":
-            mode = "OTP" # Default to OTP for encryption
+            mode = "personal" # Default to OTP for encryption
 
         if mode == "OTP":
             encryptedMsgandPass = encryptWithMode(input_text, "OTP")

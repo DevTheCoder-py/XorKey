@@ -85,7 +85,7 @@ XORKey can be used directly from the command line.
 
 ### Encrypting Data
 
-**Using OTP Mode (Default):**
+**Using OTP Mode:**
 
 ```bash
 xorkey -e "My secret message"
@@ -93,7 +93,7 @@ xorkey -e "My secret message"
 
 This will output the Base64 encoded encrypted message and the randomly generated password.
 
-**Using Personal Mode:**
+**Using Personal Mode(Default):**
 
 ```bash
 xorkey -e "My secret message" -m personal
