@@ -1,171 +1,109 @@
-<div align="center">
+# XORKey
 
-# 🔑 XORKey 🔑
+A command-line tool for symmetric encryption using XOR operations. Supports multiple encryption modes and file I/O.
 
-**A versatile Python tool for symmetric encryption using XOR operations, featuring multiple encryption modes, customizable keys, and various output formats.**
-
-</div>
+> Beginner project. Not audited for production use. Avoid using `ast.literal_eval()` in server environments.
 
 ---
 
-## 📖 Table of Contents
+## Installation
 
-- [✨ Key Features](#-key-meatures)
-- [⚙️ How It Works](#️-how-it-works)
-- [💾 Installation](#-installation)
-- [🚀 Usage](#-usage)
-- [📁 Project Structure](#-project-structure)
-- [🤝 Contributing](#-contributing)
-- [📜 License](#-license)
-
----
-## > [!NOTE]
-> This is a beginner project and is probably not up to standard and the code may be badly structured; I tried my best with minimal A.I usage(except this readme lol).
-The use of ast.literal_eval() could pose some vurnerabilities if used in a server environment.
-## ✨ Key Features
-
-- **🔒 Core XOR Encryption/Decryption:** Implements the fundamental XOR cipher for fast and secure data encryption.
-- **🔑 Multiple Encryption Modes:**
-    - **OTP (One-Time Pad):** Generates a random, secure password for each encryption, providing the highest level of security.
-    - **Personal:** Allows you to use your own password for encryption, combined with a salt and PBKDF2 for enhanced security.
-    - **Pure:** A raw binary mode for special use cases.
-- ** Automatic Format Detection:** Can automatically detect the encryption format during decryption.
-- ** Multiple Output Formats:** Supports Base64 and raw binary output.
-- ** Command-Line Interface:** A user-mriendly CLI for easy encryption and decryption directly from your terminal.
-- ** Modular Design:** The project is structured into logical modules, making it easy to understand, maintain, and extend.
-
----
-
-## ⚙️ How It Works
-
-XORKey encrypts data by XORing it with a generated keystream. The way the keystream is generated depends on the chosen encryption mode:
-
-- **OTP Mode:** A cryptographically secure random password is generated for each encryption. This password, combined with the encrypted message, forms a one-time pad. This is the most secure mode.(Well not yet, authenthencitity verification has not been implemented yet)
-- **Personal Mode:** A user-provided password is used to derive a secure key using PBKDF2 with a random salt. This method is also very secure and allows you to use a memorable password.
-
-The CLI (`xorkey`) provides a simple interface to these encryption methods, handling input/output and formatting.
-
----
-
-## 💾 Installation
-
-You can install XORKey in two ways, depending on your needs.
-
-### For Users (Recommended)
-
-This method is for users who want to use XORKey as a command-line tool. It uses `pipx` to install the package in an isolated environment.
-
+**As a CLI tool (recommended):**
 ```bash
 pipx install git+https://github.com/DevTheCoder-py/XorKey/
 ```
 
-### For Developers
-
-This method is for developers who want to contribute to the project or modify the code.
-
+**For development:**
 ```bash
-# Clone the repository
 git clone https://github.com/DevTheCoder-py/XorKey.git
 cd XorKey
-
-# Create and activate a virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
-
-# Install the package in editable mode
 pip install -e .
-#or use pipx if preferred
 ```
 
 ---
 
-## 🚀 Usage
+## Modes
 
-XORKey can be used directly from the command line.
+| Mode | Description |
+|------|-------------|
+| `personal` | Derives a key from your password using PBKDF2 + random salt. Default for encryption. |
+| `OTP` | Generates a random password per encryption. Output is Base64 encoded. |
+| `pure` | Raw binary variant of OTP. No encoding or authentication features. |
+| `auto` | Attempts to detect the mode automatically during decryption. Default for decryption. |
 
-### Encrypting Data
+---
 
-**Using OTP Mode:**
+## Usage
+
+### Encrypt
 
 ```bash
-xorkey -e "My secret message"
+# Personal mode (default) — prompts for password
+xorkey -e "message"
+
+# OTP mode — generates a random password
+xorkey -e "message" -m OTP
 ```
 
-This will output the Base64 encoded encrypted message and the randomly generated password.
-
-**Using Personal Mode(Default):**
+### Decrypt
 
 ```bash
-xorkey -e "My secret message" -m personal
+# Auto-detect mode (default)
+xorkey -d "<ciphertext>"
+
+# Specify mode manually
+xorkey -d "<ciphertext>" -m personal
+xorkey -d "<ciphertext>" -m OTP
 ```
 
-You will be prompted to enter a password for encryption.
-The method for encryption uses a randomly generated salt and given password to generate a keystream to securely XOR the message.
-
-### Decrypting Data
-
-**Using Auto-Detect Mode (Default):**
+### Files
 
 ```bash
-xorkey -d "<ENCRYPTED_MESSAGE>"
-```
+# Encrypt a file
+xorkey -e -f input.txt -o encrypted.txt
 
-The tool will try to automatically detect the encryption format. You will be prompted for the password if necessary.
-
-**Specifying the Mode:**
-
-If auto-detection fails, you can specify the mode manually.
-
-```bash
-# For OTP mode
-xorkey -d "<ENCRYPTED_MESSAGE>" -m OTP
-
-# For Personal mode
-xorkey -d "<ENCRYPTED_MESSAGE>" -m personal
-```
-
-You will be prompted for the password.
-
-### Encrypting/Decrypting Files
-
-XORKey can also encrypt or decrypt the content of a file.
-
-**Encrypting a File:**
-
-To encrypt the content of `my_secret.txt` and save it to `encrypted.txt`:
-```bash
-xorkey -e -f my_secret.txt -o encrypted.txt
-```
-
-This command reads the content of `my_secret.txt`, encrypts it, and writes the encrypted output to `encrypted.txt`. 
-If you are using `OTP` or `pure` mode, a password file named `encrypted.pass` will be created in the same directory.
-
-**Decrypting a File:**
-
-To decrypt the content of `encrypted.txt` and save it to `decrypted.txt`:
-```bash
+# Decrypt a file
 xorkey -d -f encrypted.txt -o decrypted.txt
 ```
 
-This command reads the content of `encrypted.txt` and decrypts it. If the file was encrypted in `OTP` or `pure` mode, it will automatically look for the password in `encrypted.pass`(or whatever file name of the encrypted file is +.pass. If you used `personal` mode, you will be prompted for your password.
+When encrypting a file with OTP or pure mode, a `<filename>.pass` file is created alongside the output. Decryption will look for this file automatically.
 
 ---
 
-## 📁 Project Structure
+## Arguments
 
-- **`xorkey/core.py`**: Contains the core logic for encryption and decryption.
-- **`xorkey/main.py`**: Implements the command-line interface.
-- **`xorkey/utils.py`**: Provides utility functions for string manipulation, encoding, and more.
-- **`tests/`**: Contains unit tests or trials for the project.
+```
+-e, --encrypt [TEXT]      Encrypt text or file content
+-d, --decrypt [CIPHER]    Decrypt ciphertext or file content
+-m, --mode MODE           Encryption mode: pure | OTP | personal | auto
+-f, --file FILE           Input file
+-o, --output FILE         Output file
+```
 
 ---
 
-## 🤝 Contributing
+## How It Works
 
-Contributions are welcome! If you have any ideas, suggestions, or bug reports, please open an issue or submit a pull request.
-After all, this is simply a beginner project that I wanted to try making. 
+- **OTP:** A cryptographically secure random password is generated and XORed against the input as a keystream.
+- **Personal:** Your password is run through PBKDF2 with a random salt to derive the keystream.
+- **Pure:** Same as OTP without Base64 encoding or authentication overhead.
+
 ---
 
-## 📜 License
+## Project Structure
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+```
+xorkey/
+  core.py    # Encryption and decryption logic
+  main.py    # CLI
+  utils.py   # Encoding and helper functions
+tests/       # Tests
+```
+
+---
+
+## License
+
+MIT. See [LICENSE](LICENSE).
